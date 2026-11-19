@@ -1,0 +1,16 @@
+{
+  "name": "vlip/vlip-editor-tools",
+  "description": "Verbesserungen für den Block-Editor, die jedes VLIP-Bedrock-Projekt bekommt.",
+  "type": "wordpress-muplugin",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "VLIP",
+      "homepage": "https://vlip.io"
+    }
+  ],
+  "require": {
+    "php": ">=8.1",
+    "composer/installers": "^2.0"
+  }
+}

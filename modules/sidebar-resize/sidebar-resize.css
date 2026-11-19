@@ -1,0 +1,69 @@
+/* Seitenleiste des Block-Editors: 360 px statt 280 px, mit Ziehgriff am
+   linken Rand. Griff und Breite setzt sidebar-resize.js über die Variable
+   --vlip-sidebar-width.
+
+   Warum !important: In WP 7.1 setzt core die 280 px inline auf beide Ebenen,
+   den animierten Wrapper und die Leiste. Ab Gutenberg 23.8 (#81363,
+   voraussichtlich WP 7.2) kommt die Breite nur noch aus dem Stylesheet. Dann
+   kann !important raus.
+
+   Unter 782 px legt core die Leiste über den Inhalt; dort bleibt alles core. */
+@media (min-width: 782px) {
+    .interface-interface-skeleton__sidebar .interface-complementary-area__fill,
+    .interface-interface-skeleton__sidebar .interface-complementary-area {
+        width: var(--vlip-sidebar-width, 360px) !important;
+    }
+
+    .vlip-sidebar-resize {
+        position: absolute;
+        inset-block: 0;
+        inset-inline-start: 0;
+        z-index: 10;
+        width: 12px;
+        cursor: col-resize;
+        touch-action: none;
+    }
+
+    .vlip-sidebar-resize::after {
+        content: "";
+        position: absolute;
+        inset-block: 0;
+        inset-inline-start: 0;
+        width: 3px;
+        background: var(--wp-admin-theme-color, #3858e9);
+        opacity: 0;
+        transition: opacity 0.15s;
+    }
+
+    .vlip-sidebar-resize:hover::after,
+    .vlip-sidebar-resize:focus-visible::after,
+    .vlip-sidebar-resize.is-dragging::after {
+        opacity: 1;
+    }
+
+    .vlip-sidebar-resize:focus-visible {
+        outline: 2px solid var(--wp-admin-theme-color, #3858e9);
+        outline-offset: -2px;
+    }
+
+    .interface-interface-skeleton__sidebar:not(:has(.interface-complementary-area)) .vlip-sidebar-resize {
+        display: none;
+    }
+
+    body.vlip-sidebar-resizing {
+        cursor: col-resize;
+        user-select: none;
+    }
+}
+
+@media (max-width: 781px) {
+    .vlip-sidebar-resize {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vlip-sidebar-resize::after {
+        transition: none;
+    }
+}
