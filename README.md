@@ -17,12 +17,15 @@ In der `composer.json` des Projekts das Repository eintragen:
 "repositories": [
   {
     "type": "vcs",
-    "url": "git@github.com:MAAANYdevs/vlip-editor-tools.git",
+    "url": "https://github.com/MAAANYdevs/vlip-editor-tools.git",
     "no-api": true,
     "only": ["vlip/vlip-editor-tools"]
   }
 ]
 ```
+
+Das Repo ist öffentlich. ddev und der Docker-Build brauchen dafür weder
+SSH-Key noch Token.
 
 Dann installieren:
 
