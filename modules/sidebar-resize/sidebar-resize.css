@@ -23,43 +23,58 @@
         width: var(--vlip-secondary-sidebar-width, 350px) !important;
     }
 
+    /* Die rechte Leiste schneidet sonst die halbe Pille ab. Gescrollt wird
+       im Panel darin, nicht im Container. */
+    .interface-interface-skeleton__sidebar {
+        overflow: visible;
+    }
+
+    /* Der Griff ist 12 px breit und sitzt mittig auf der Trennlinie. */
     .vlip-sidebar-resize {
         position: absolute;
         inset-block: 0;
-        inset-inline-start: 0;
+        inset-inline-start: -6px;
         z-index: 10;
         width: 12px;
         cursor: col-resize;
         touch-action: none;
     }
 
-    .vlip-sidebar-resize::after {
+    .vlip-sidebar-resize--secondary {
+        inset-inline-start: auto;
+        inset-inline-end: -6px;
+    }
+
+    /* Die Pille wie beim Griff der Metaboxen in core, nur senkrecht.
+       Core nimmt #ddd. Das hat auf Weiß nur 1,4:1 Kontrast. #949494
+       (gray-600 aus core) erreicht 3:1, wie WCAG 1.4.11 es für
+       Bedienelemente verlangt. */
+    .vlip-sidebar-resize::before {
         content: "";
         position: absolute;
-        inset-block: 0;
-        inset-inline-start: 0;
-        width: 3px;
-        background: var(--wp-admin-theme-color, #3858e9);
-        opacity: 0;
-        transition: opacity 0.15s;
-    }
-
-    .vlip-sidebar-resize:hover::after,
-    .vlip-sidebar-resize:focus-visible::after,
-    .vlip-sidebar-resize.is-dragging::after {
-        opacity: 1;
-    }
-
-    .vlip-sidebar-resize:focus-visible {
-        outline: 2px solid var(--wp-admin-theme-color, #3858e9);
+        inset-block-start: calc(50% - 32px);
+        inset-inline-start: calc(50% - 2px);
+        width: 4px;
+        height: 64px;
+        border-radius: 2px;
+        background-color: #949494;
+        outline: 2px solid transparent;
         outline-offset: -2px;
     }
 
-    /* Links sitzt der Griff am rechten Rand, die Linie ebenso. */
-    .vlip-sidebar-resize--secondary,
-    .vlip-sidebar-resize--secondary::after {
-        inset-inline-start: auto;
-        inset-inline-end: 0;
+    .vlip-sidebar-resize:is(:hover, :focus-visible, .is-dragging)::before {
+        inset-block-start: calc(50% - 40px);
+        height: 80px;
+        background-color: var(--wp-admin-theme-color, #3858e9);
+    }
+
+    .vlip-sidebar-resize:focus-visible {
+        outline: none;
+    }
+
+    .vlip-sidebar-resize:focus-visible::before {
+        outline: 2px solid var(--wp-admin-theme-color, #3858e9);
+        outline-offset: 2px;
     }
 
     .interface-interface-skeleton__sidebar:not(:has(.interface-complementary-area)) .vlip-sidebar-resize {
@@ -78,8 +93,20 @@
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .vlip-sidebar-resize::after {
-        transition: none;
+@media (min-width: 782px) and (prefers-reduced-motion: no-preference) {
+    .vlip-sidebar-resize::before {
+        transition: height 0.3s ease-out, inset-block-start 0.3s ease-out;
+    }
+}
+
+/* Im Hochkontrast-Modus setzt der Browser Hintergründe zurück. Die Pille
+   bekommt dort die Systemfarben, sonst wäre sie unsichtbar. */
+@media (forced-colors: active) {
+    .vlip-sidebar-resize::before {
+        background-color: CanvasText;
+    }
+
+    .vlip-sidebar-resize:is(:hover, :focus-visible, .is-dragging)::before {
+        background-color: Highlight;
     }
 }
