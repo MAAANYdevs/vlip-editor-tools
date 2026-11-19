@@ -1,12 +1,9 @@
-/* Seitenleisten des Block-Editors mit Ziehgriff.
-   Rechts: 360 px statt 280 px, Griff am linken Rand, Variable
-   --vlip-sidebar-width.
-   Links (Listenansicht und Inserter): 350 px wie core, Griff am rechten Rand,
-   Variable --vlip-secondary-sidebar-width.
-   Die Variablen setzt sidebar-resize.js auf <html>.
+/* Einstellungs-Seitenleiste des Block-Editors: 360 px statt 280 px, mit
+   Ziehgriff am linken Rand. Die Breite setzt sidebar-resize.js über die
+   Variable --vlip-sidebar-width auf <html>.
 
-   Warum !important: In WP 7.1 setzt core die Breiten inline, rechts auf den
-   animierten Wrapper und die Leiste, links auf den Container. Ab Gutenberg 23.8 (#81363,
+   Warum !important: In WP 7.1 setzt core die 280 px inline auf beide Ebenen,
+   den animierten Wrapper und die Leiste. Ab Gutenberg 23.8 (#81363,
    voraussichtlich WP 7.2) kommt die Breite nur noch aus dem Stylesheet. Dann
    kann !important raus.
 
@@ -17,19 +14,14 @@
         width: var(--vlip-sidebar-width, 360px) !important;
     }
 
-    .interface-interface-skeleton__secondary-sidebar,
-    .interface-interface-skeleton__secondary-sidebar .editor-list-view-sidebar,
-    .interface-interface-skeleton__secondary-sidebar .editor-inserter-sidebar {
-        width: var(--vlip-secondary-sidebar-width, 350px) !important;
-    }
-
-    /* Die rechte Leiste schneidet sonst die halbe Pille ab. Gescrollt wird
-       im Panel darin, nicht im Container. */
+    /* Die Leiste schneidet sonst den Teil von Griff und blauer Linie ab, der
+       links der Trennlinie liegt. Gescrollt wird im Panel darin, nicht im
+       Container. */
     .interface-interface-skeleton__sidebar {
         overflow: visible;
     }
 
-    /* Der Griff ist 18 px breit. 4 px liegen außerhalb der Trennlinie,
+    /* Der Griff ist 18 px breit. 4 px liegen links der Trennlinie,
        14 px in der Leiste. In diesem Streifen sitzen die Linie (::after)
        und die Pille (::before). */
     .vlip-sidebar-resize {
@@ -40,11 +32,6 @@
         width: 18px;
         cursor: col-resize;
         touch-action: none;
-    }
-
-    .vlip-sidebar-resize--secondary {
-        inset-inline-start: auto;
-        inset-inline-end: -4px;
     }
 
     /* Die Trennlinie wird bei Hover, Fokus und Ziehen über die ganze Höhe
@@ -75,17 +62,6 @@
         background-color: #949494;
         outline: 2px solid transparent;
         outline-offset: -2px;
-    }
-
-    /* Links liegt die Leiste auf der anderen Seite der Linie. */
-    .vlip-sidebar-resize--secondary::after {
-        inset-inline-start: auto;
-        inset-inline-end: 3px;
-    }
-
-    .vlip-sidebar-resize--secondary::before {
-        inset-inline-start: auto;
-        inset-inline-end: 10px;
     }
 
     .vlip-sidebar-resize:is(:hover, :focus-visible, .is-dragging)::after {
@@ -146,26 +122,3 @@
     }
 }
 
-/* Inserter: Core gibt ihm innen eine feste Breite von 350 px. Ist die Leiste
-   schmaler, ragen die Blöcke über die Leinwand. Ist sie breiter, bleibt
-   rechts eine leere Fläche. Hier füllt er die Leiste. */
-@media (min-width: 782px) {
-    .editor-inserter-sidebar .block-editor-inserter__main-area .block-editor-tabbed-sidebar {
-        width: var(--vlip-secondary-sidebar-width, 350px);
-    }
-
-    /* Das Panel für Vorlagen- und Medien-Kategorien klappt rechts neben
-       dem Inserter auf. Core setzt es fest auf 350 px. */
-    body:not(.rtl) .editor-inserter-sidebar .block-editor-inserter__category-panel {
-        left: var(--vlip-secondary-sidebar-width, 350px);
-    }
-
-    body.rtl .editor-inserter-sidebar .block-editor-inserter__category-panel {
-        right: var(--vlip-secondary-sidebar-width, 350px);
-    }
-
-    /* Die Spaltenzahl bleibt bei drei. Core baut feste Dreierzeilen, und
-       die Pfeiltasten springen in dieser Zeilenlogik. Mehr Spalten per CSS
-       würden das Bild von der Tastatur-Navigation trennen. Die Kacheln sind
-       33,33 % breit und wachsen mit der Leiste. */
-}

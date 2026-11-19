@@ -7,7 +7,7 @@ Das Paket ist ein mu-plugin. Redakteure können es also nicht abschalten.
 
 | Modul | Was es macht |
 | --- | --- |
-| `sidebar-resize` | Beide Seitenleisten bekommen einen Ziehgriff. Rechts (Einstellungen) ist die Leiste 360 px breit statt 280 px. Links (Listenansicht und Inserter) bleibt sie bei 350 px. Die Breiten werden pro User gespeichert. |
+| `sidebar-resize` | Die Einstellungs-Seitenleiste ist 360 px breit statt 280 px. Am linken Rand sitzt ein Ziehgriff. Die Breite wird pro User gespeichert. |
 
 ## Einbinden
 

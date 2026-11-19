@@ -1,5 +1,5 @@
 /**
- * Ziehgriffe für die beiden Seitenleisten des Block-Editors.
+ * Ziehgriff für die Einstellungs-Seitenleiste des Block-Editors.
  * Erklärung und Bedienung stehen in module.php.
  */
 ( function ( wp ) {
@@ -8,51 +8,12 @@
 	}
 
 	var SCOPE = 'vlip';
+	var KEY = 'editorSidebarWidth';
+	var DEFAULT = 360;
 	var MIN = 280;
 	var STEP = 20;
 	var root = document.documentElement;
-
-	/*
-	 * `grow` sagt, in welche Richtung die Leiste breiter wird. Die rechte
-	 * Leiste wächst nach links, ihr Griff sitzt am linken Rand. Die linke
-	 * Leiste wächst nach rechts, ihr Griff sitzt am rechten Rand.
-	 */
-	var sidebars = [
-		{
-			container: '.interface-interface-skeleton__sidebar',
-			key: 'editorSidebarWidth',
-			variable: '--vlip-sidebar-width',
-			label: 'Breite der rechten Seitenleiste',
-			className: 'vlip-sidebar-resize',
-			fallback: 360,
-			grow: 'left',
-		},
-		{
-			container: '.interface-interface-skeleton__secondary-sidebar',
-			key: 'editorSecondarySidebarWidth',
-			variable: '--vlip-secondary-sidebar-width',
-			label: 'Breite der linken Seitenleiste',
-			className: 'vlip-sidebar-resize vlip-sidebar-resize--secondary',
-			fallback: 350,
-			grow: 'right',
-		},
-	];
-
-	// Breite, die die andere Leiste gerade auf dem Bildschirm einnimmt.
-	function otherWidth( sidebar ) {
-		var other = sidebars[ sidebars.indexOf( sidebar ) === 0 ? 1 : 0 ];
-		var el = document.querySelector( other.container );
-		return el ? el.getBoundingClientRect().width : 0;
-	}
-
-	// Höchstens 720 px, und die Leinwand behält mindestens 480 px.
-	function max( sidebar ) {
-		return Math.max( MIN, Math.min( 720, window.innerWidth - 480 - otherWidth( sidebar ) ) );
-	}
-
-	function clamp( sidebar, value ) {
-		return Math.round( Math.min( max( sidebar ), Math.max( MIN, value ) ) );
-	}
+	var handle = null;
 
 	/*
 	 * `preferred` ist die Breite, die der User eingestellt hat. `width` ist die
@@ -60,159 +21,142 @@
 	 * `width`. Wird es wieder breiter, kommt die eingestellte Breite zurück.
 	 * Gespeichert wird nur, was der User selbst einstellt.
 	 */
-	function apply( sidebar, value, save ) {
-		if ( save ) {
-			sidebar.preferred = clamp( sidebar, value );
-		}
-		sidebar.width = clamp( sidebar, save ? sidebar.preferred : value );
-		root.style.setProperty( sidebar.variable, sidebar.width + 'px' );
+	var preferred = DEFAULT;
+	var width = DEFAULT;
 
-		var handle = sidebar.handle;
+	// Höchstens 720 px, und die Leinwand behält mindestens 480 px.
+	function max() {
+		return Math.max( MIN, Math.min( 720, window.innerWidth - 480 ) );
+	}
+
+	function clamp( value ) {
+		return Math.round( Math.min( max(), Math.max( MIN, value ) ) );
+	}
+
+	function apply( value, save ) {
+		if ( save ) {
+			preferred = clamp( value );
+		}
+		width = clamp( save ? preferred : value );
+		root.style.setProperty( '--vlip-sidebar-width', width + 'px' );
+
 		if ( handle && handle.isConnected ) {
-			handle.setAttribute( 'aria-valuenow', String( sidebar.width ) );
-			handle.setAttribute( 'aria-valuemax', String( max( sidebar ) ) );
-			handle.setAttribute( 'aria-valuetext', sidebar.width + ' Pixel' );
+			handle.setAttribute( 'aria-valuenow', String( width ) );
+			handle.setAttribute( 'aria-valuemax', String( max() ) );
+			handle.setAttribute( 'aria-valuetext', width + ' Pixel' );
 		}
 
 		if ( save ) {
 			var prefs = wp.data.dispatch( 'core/preferences' );
 			if ( prefs ) {
-				prefs.set( SCOPE, sidebar.key, sidebar.preferred );
+				prefs.set( SCOPE, KEY, preferred );
 			}
 		}
 	}
 
 	// Zeigt wieder die eingestellte Breite, so weit der Platz reicht.
-	function restore( sidebar ) {
-		apply( sidebar, sidebar.preferred, false );
+	function restore() {
+		apply( preferred, false );
 	}
 
-	function createHandle( sidebar ) {
-		var handle = document.createElement( 'div' );
-		handle.className = sidebar.className;
-		handle.tabIndex = 0;
-		handle.setAttribute( 'role', 'separator' );
-		handle.setAttribute( 'aria-orientation', 'vertical' );
-		handle.setAttribute( 'aria-label', sidebar.label );
-		handle.setAttribute( 'aria-valuemin', String( MIN ) );
-		handle.title = 'Ziehen ändert die Breite, Doppelklick setzt zurück';
+	function createHandle() {
+		var el = document.createElement( 'div' );
+		el.className = 'vlip-sidebar-resize';
+		el.tabIndex = 0;
+		el.setAttribute( 'role', 'separator' );
+		el.setAttribute( 'aria-orientation', 'vertical' );
+		el.setAttribute( 'aria-label', 'Breite der Seitenleiste' );
+		el.setAttribute( 'aria-valuemin', String( MIN ) );
+		el.title = 'Ziehen ändert die Breite, Doppelklick setzt zurück';
 
-		handle.addEventListener( 'pointerdown', function ( event ) {
+		el.addEventListener( 'pointerdown', function ( event ) {
 			if ( event.button !== 0 ) {
 				return;
 			}
 			event.preventDefault();
 
-			var rect = handle.parentElement.getBoundingClientRect();
+			var right = el.parentElement.getBoundingClientRect().right;
 
 			// Pointer-Capture hält die Events beim Griff, auch wenn die Maus
 			// über das iframe der Leinwand fährt.
-			handle.setPointerCapture( event.pointerId );
-			handle.classList.add( 'is-dragging' );
+			el.setPointerCapture( event.pointerId );
+			el.classList.add( 'is-dragging' );
 			document.body.classList.add( 'vlip-sidebar-resizing' );
 
 			function move( e ) {
-				var value = sidebar.grow === 'left' ? rect.right - e.clientX : e.clientX - rect.left;
-				apply( sidebar, value, false );
+				apply( right - e.clientX, false );
 			}
 
 			function stop( e ) {
-				handle.releasePointerCapture( e.pointerId );
-				handle.classList.remove( 'is-dragging' );
+				el.releasePointerCapture( e.pointerId );
+				el.classList.remove( 'is-dragging' );
 				document.body.classList.remove( 'vlip-sidebar-resizing' );
-				handle.removeEventListener( 'pointermove', move );
-				handle.removeEventListener( 'pointerup', stop );
-				handle.removeEventListener( 'pointercancel', stop );
-				apply( sidebar, sidebar.width, true );
+				el.removeEventListener( 'pointermove', move );
+				el.removeEventListener( 'pointerup', stop );
+				el.removeEventListener( 'pointercancel', stop );
+				apply( width, true );
 			}
 
-			handle.addEventListener( 'pointermove', move );
-			handle.addEventListener( 'pointerup', stop );
-			handle.addEventListener( 'pointercancel', stop );
+			el.addEventListener( 'pointermove', move );
+			el.addEventListener( 'pointerup', stop );
+			el.addEventListener( 'pointercancel', stop );
 		} );
 
-		handle.addEventListener( 'dblclick', function () {
-			apply( sidebar, sidebar.fallback, true );
+		el.addEventListener( 'dblclick', function () {
+			apply( DEFAULT, true );
 		} );
 
-		handle.addEventListener( 'keydown', function ( event ) {
-			// Die Pfeiltaste in Wachstumsrichtung macht die Leiste breiter.
-			var wider = sidebar.grow === 'left' ? 'ArrowLeft' : 'ArrowRight';
-			var narrower = sidebar.grow === 'left' ? 'ArrowRight' : 'ArrowLeft';
+		el.addEventListener( 'keydown', function ( event ) {
 			var next = null;
 
 			switch ( event.key ) {
-				case wider:
-					next = sidebar.width + STEP;
+				case 'ArrowLeft':
+					next = width + STEP;
 					break;
-				case narrower:
-					next = sidebar.width - STEP;
+				case 'ArrowRight':
+					next = width - STEP;
 					break;
 				case 'Home':
 					next = MIN;
 					break;
 				case 'End':
-					next = max( sidebar );
+					next = max();
 					break;
 				case 'Delete':
 				case 'Backspace':
-					next = sidebar.fallback;
+					next = DEFAULT;
 					break;
 			}
 
 			if ( next !== null ) {
 				event.preventDefault();
-				apply( sidebar, next, true );
+				apply( next, true );
 			}
 		} );
 
-		return handle;
+		return el;
 	}
 
-	// React baut die Leisten beim Öffnen und Schließen neu auf. Der Observer
-	// hängt die Griffe jedes Mal wieder ein.
-	function ensureHandle( sidebar ) {
-		var container = document.querySelector( sidebar.container );
-		if ( container && ! container.querySelector( ':scope > .vlip-sidebar-resize' ) ) {
-			sidebar.handle = createHandle( sidebar );
-			container.appendChild( sidebar.handle );
+	// React baut die Seitenleiste beim Öffnen und Schließen neu auf. Der
+	// Observer hängt den Griff jedes Mal wieder ein.
+	function ensureHandle() {
+		var sidebar = document.querySelector( '.interface-interface-skeleton__sidebar' );
+		if ( sidebar && ! sidebar.querySelector( ':scope > .vlip-sidebar-resize' ) ) {
+			handle = createHandle();
+			sidebar.appendChild( handle );
+			restore();
 		}
-	}
-
-	// Welche Leisten gerade offen sind. Ändert sich das, bekommt jede Leiste
-	// wieder ihre eingestellte Breite, so weit der Platz reicht.
-	function openState() {
-		return sidebars
-			.map( function ( sidebar ) {
-				var container = document.querySelector( sidebar.container );
-				return container && container.getBoundingClientRect().width > 0 ? '1' : '0';
-			} )
-			.join( '' );
 	}
 
 	var store = wp.data.select( 'core/preferences' );
-
-	sidebars.forEach( function ( sidebar ) {
-		var stored = store ? parseInt( store.get( SCOPE, sidebar.key ), 10 ) : NaN;
-		sidebar.preferred = stored || sidebar.fallback;
-		restore( sidebar );
-	} );
+	var stored = store ? parseInt( store.get( SCOPE, KEY ), 10 ) : NaN;
+	preferred = stored || DEFAULT;
+	restore();
 
 	wp.domReady( function () {
 		var queued = false;
-		var lastState = '';
 
-		function ensureAll() {
-			sidebars.forEach( ensureHandle );
-
-			var state = openState();
-			if ( state !== lastState ) {
-				lastState = state;
-				sidebars.forEach( restore );
-			}
-		}
-
-		ensureAll();
+		ensureHandle();
 
 		new MutationObserver( function () {
 			if ( queued ) {
@@ -221,12 +165,10 @@
 			queued = true;
 			window.requestAnimationFrame( function () {
 				queued = false;
-				ensureAll();
+				ensureHandle();
 			} );
 		} ).observe( document.body, { childList: true, subtree: true } );
 
-		window.addEventListener( 'resize', function () {
-			sidebars.forEach( restore );
-		} );
+		window.addEventListener( 'resize', restore );
 	} );
 } )( window.wp );
