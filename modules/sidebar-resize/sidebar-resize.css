@@ -1,9 +1,12 @@
-/* Seitenleiste des Block-Editors: 360 px statt 280 px, mit Ziehgriff am
-   linken Rand. Griff und Breite setzt sidebar-resize.js über die Variable
+/* Seitenleisten des Block-Editors mit Ziehgriff.
+   Rechts: 360 px statt 280 px, Griff am linken Rand, Variable
    --vlip-sidebar-width.
+   Links (Listenansicht und Inserter): 350 px wie core, Griff am rechten Rand,
+   Variable --vlip-secondary-sidebar-width.
+   Die Variablen setzt sidebar-resize.js auf <html>.
 
-   Warum !important: In WP 7.1 setzt core die 280 px inline auf beide Ebenen,
-   den animierten Wrapper und die Leiste. Ab Gutenberg 23.8 (#81363,
+   Warum !important: In WP 7.1 setzt core die Breiten inline, rechts auf den
+   animierten Wrapper und die Leiste, links auf den Container. Ab Gutenberg 23.8 (#81363,
    voraussichtlich WP 7.2) kommt die Breite nur noch aus dem Stylesheet. Dann
    kann !important raus.
 
@@ -12,6 +15,12 @@
     .interface-interface-skeleton__sidebar .interface-complementary-area__fill,
     .interface-interface-skeleton__sidebar .interface-complementary-area {
         width: var(--vlip-sidebar-width, 360px) !important;
+    }
+
+    .interface-interface-skeleton__secondary-sidebar,
+    .interface-interface-skeleton__secondary-sidebar .editor-list-view-sidebar,
+    .interface-interface-skeleton__secondary-sidebar .editor-inserter-sidebar {
+        width: var(--vlip-secondary-sidebar-width, 350px) !important;
     }
 
     .vlip-sidebar-resize {
@@ -44,6 +53,13 @@
     .vlip-sidebar-resize:focus-visible {
         outline: 2px solid var(--wp-admin-theme-color, #3858e9);
         outline-offset: -2px;
+    }
+
+    /* Links sitzt der Griff am rechten Rand, die Linie ebenso. */
+    .vlip-sidebar-resize--secondary,
+    .vlip-sidebar-resize--secondary::after {
+        inset-inline-start: auto;
+        inset-inline-end: 0;
     }
 
     .interface-interface-skeleton__sidebar:not(:has(.interface-complementary-area)) .vlip-sidebar-resize {

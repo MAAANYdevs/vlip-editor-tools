@@ -3,7 +3,7 @@
  * Plugin Name: VLIP Editor Tools
  * Plugin URI: https://vlip.io
  * Description: Verbesserungen für den Block-Editor, die jedes VLIP-Projekt bekommt.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Requires at least: 6.5
  * Requires PHP: 8.1
  * Author: VLIP
@@ -14,7 +14,7 @@ namespace Vlip\EditorTools;
 
 defined('ABSPATH') || exit;
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 
 /**
  * Die Module, die geladen werden. Ein Projekt schaltet ein Modul ab, indem es

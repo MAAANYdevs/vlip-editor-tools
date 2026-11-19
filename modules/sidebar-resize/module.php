@@ -1,27 +1,37 @@
 <?php
 /**
- * Macht die Einstellungs-Seitenleiste des Block-Editors 360 px statt 280 px
- * breit und gibt ihr am linken Rand einen Ziehgriff.
+ * Gibt beiden Seitenleisten des Block-Editors einen Ziehgriff.
+ *
+ * - Rechts (Einstellungen): 360 px statt 280 px, Griff am linken Rand.
+ * - Links (Listenansicht und Inserter): 350 px wie core, Griff am rechten
+ *   Rand. Listenansicht und Inserter teilen sich die Breite, weil core beide
+ *   im selben Container zeigt.
  *
  * Core kann das nicht (Stand WP 7.1.4). Ein PR dafür liegt offen:
  * https://github.com/WordPress/gutenberg/pull/70616
  *
  * Warum JavaScript: CSS hat nur `resize`, und das setzt den Griff in die
- * untere rechte Ecke. Bei einer Seitenleiste rechts zieht er dort in die
- * falsche Richtung. Das Skript setzt nur die CSS-Variable
- * `--vlip-sidebar-width` auf <html>; die Breite selbst bleibt CSS.
+ * untere rechte Ecke. Bei der rechten Leiste zieht er dort in die falsche
+ * Richtung. Das Skript setzt nur die CSS-Variablen `--vlip-sidebar-width`
+ * und `--vlip-secondary-sidebar-width` auf <html>; die Breite selbst bleibt
+ * CSS.
  *
  * Bedienung: Ziehen mit der Maus. Mit der Tastatur Fokus auf den Griff, dann
- * Pfeil links/rechts (Schritt 20 px), Pos1/Ende für schmal/breit. Doppelklick
- * oder Entf setzt auf 360 px zurück.
+ * Pfeiltasten (Schritt 20 px), Pos1/Ende für schmal/breit. Doppelklick oder
+ * Entf setzt auf den Standard zurück.
  *
- * Die Breite wird pro User gespeichert, im Preferences-Store von core
- * (`core/preferences`, Scope `vlip`, Key `editorSidebarWidth`). Core schreibt
- * ihn gebündelt per REST in die User-Meta `{prefix}persisted_preferences` und
- * lädt ihn beim Öffnen des Editors vor. Die Breite gilt damit in jedem Browser.
+ * Grenzen: mindestens 280 px, höchstens 720 px. Die Leinwand behält immer
+ * mindestens 480 px. Wird das Fenster schmaler, schrumpfen die Leisten. Wird
+ * es wieder breiter, kommt die eingestellte Breite zurück.
  *
- * Unter 782 px Fensterbreite legt core die Leiste über den Inhalt; dort bleibt
- * alles wie im Core.
+ * Die Breiten werden pro User gespeichert, im Preferences-Store von core
+ * (`core/preferences`, Scope `vlip`, Keys `editorSidebarWidth` und
+ * `editorSecondarySidebarWidth`). Core schreibt sie gebündelt per REST in die
+ * User-Meta `{prefix}persisted_preferences` und lädt sie beim Öffnen des
+ * Editors vor. Die Breiten gelten damit in jedem Browser.
+ *
+ * Unter 782 px Fensterbreite legt core die Leisten über den Inhalt; dort
+ * bleibt alles wie im Core.
  */
 
 namespace Vlip\EditorTools\SidebarResize;
