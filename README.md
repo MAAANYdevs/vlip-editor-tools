@@ -30,14 +30,15 @@ SSH-Key noch Token.
 Dann installieren:
 
 ```sh
-ddev composer require vlip/vlip-editor-tools:dev-main
+ddev composer require vlip/vlip-editor-tools:^1.4
 ```
 
 Bedrock legt das Paket nach `web/app/mu-plugins/vlip-editor-tools/`. Der
 Bedrock-Autoloader lädt es von dort. Dafür muss `installer-paths` den Typ
 `wordpress-muplugin` kennen. Das ist im Bedrock-Standard so eingestellt.
 
-Updates holt `ddev composer update vlip/vlip-editor-tools`.
+Updates holt `ddev composer update vlip/vlip-editor-tools`. Vorher in
+`CHANGELOG.md` lesen, was sich seit der eingebundenen Version geändert hat.
 
 ## Ein Modul abschalten
 
